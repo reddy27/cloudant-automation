@@ -1,0 +1,80 @@
+{
+    "_id": "_design/getTransactionsSearchs",
+    "views": {
+    "transactionMrnAssignment": {
+        "map": "function (doc) {\n  if(doc.structureType && (doc.structureType===\"transaction\") && doc.internalStatus && doc.internalStatus===\"Pending MRN Resolution\" && doc.transactionStatusReason && doc.transactionStatusReason===\"MRN assignment in Progress\"){\n    \n      emit(doc._id,{\"confirmationId\":doc.confirmationId});\n      \n    \n  }\n}"
+    },
+    "getRMSExceptionTransactionByConfirmationId": {
+        "map": "function (doc) {\n  if (doc.structureType && (doc.structureType===\"confirmation\") && !doc.confirmationId.match(/RQID*/) && (doc.confirmationStatus && doc.confirmationStatus.toUpperCase()===\"RMS ERROR\") && (!doc.exceptionInfo || !doc.exceptionInfo.enrollmentStage || (doc.exceptionInfo.enrollmentStage!==\"MRN assignment in Progress\" &&  doc.exceptionInfo.enrollmentStage!==\"MRN assignment Submitted\"))){\n  emit(doc._id, { \"confirmationId\" : doc.confirmationId });\n}\n}"
+    },
+    "transactionRmsException": {
+        "map": "function (doc) {\n  if(doc.structureType && (doc.structureType===\"transaction\") && doc.internalStatus && doc.internalStatus===\"Pending RMS Resolution\")\n  \n  emit(doc._id,{\"confirmationId\":doc.confirmationId});\n  \n}"
+    },
+    "getMRNAssignTransactionByConfirmationId": {
+        "map": "function (doc) {\n  if(doc.structureType && (doc.structureType===\"confirmation\") && (doc.exceptionInfo && doc.exceptionInfo.enrollmentStage && doc.exceptionInfo.enrollmentStage===\"MRN assignment in Progress\")){\n  emit(doc._id, { \"confirmationId\" : doc.confirmationId });\n}\n}"
+    }
+},
+    "language": "javascript",
+    "indexes": {
+    "searchIndexNoMemberReport": {
+        "analyzer": "standard",
+            "index": "function (doc) {\n  \n    \n        if(doc.structureType && doc.structureType===\"confirmation\"){\n          index(\"structureType\",doc.structureType);\n        if(doc.region){\n          index(\"region\",doc.region);\n        }\n        if(doc.transactionType){\n          index(\"transactionType\",doc.transactionType);\n        }\n        if(doc.groupId){\n          index(\"groupId\",doc.groupId);\n        }\n        if(doc.subgroupId){\n            index(\"subgroupId\",doc.subgroupId);\n        }\n        if(doc.subscriberMrn){\n          index(\"subscriberMrn\",doc.subscriberMrn);\n        }\n        }\n  \n}"
+    },
+    "dependentIndex": {
+        "analyzer": "standard",
+            "index": "function (doc) {\n  if(doc.structureType && doc.structureType===\"transaction\" && doc.memberMrn && doc.memberMrn!==\"\"){\n    index(\"structureType\", doc.structureType);\n    index(\"memberMrn\", doc.memberMrn);\n    if(doc.transactionType){\n      index(\"transactionType\", doc.transactionType);\n    }    \n  }\n}"
+    },
+    "reportsIndex": {
+        "analyzer": "standard",
+            "index": "\nfunction (doc) {\n  if(doc.structureType && doc.structureType===\"confirmation\" && doc.transactionType && doc.transactionType!==\"MemberReport\" && doc.transactionType!==\"\"){\n    index(\"structureType\", doc.structureType);\n    index(\"transactionType\", doc.transactionType);\n  \n    if(doc.createTimestamp){\n        index(\"createTimestamp\", doc.createTimestamp);\n    }\n  \n  }\n  \n}"
+    },
+    "searchIndexComplex": {
+        "analyzer": "standard",
+            "index": "function (doc) {\n  index(\"confirmationId\", doc.confirmationId);\n}"
+    },
+    "transactionsIndex": {
+        "analyzer": "standard",
+            "index": "function (doc) {\n  if(doc.structureType && doc.structureType===\"transaction\"){\n    index(\"structureType\", doc.structureType);\n    if(doc.confirmationId){\n      index(\"confirmationId\", doc.confirmationId);\n    }\n    if(doc.transactionType){\n      index(\"transactionType\", doc.transactionType);\n    }\n  \n    if(doc.createTimestamp){\n      index(\"createTimestamp\", doc.createTimestamp);\n    }\n  \n\n  }\n  \n\n}"
+    },
+    "allMRNAssignTransactions": {
+        "analyzer": "standard",
+            "index": "function (doc) {\n  \n  if(doc.structureType && doc.structureType==='confirmation'){\n    index(\"structureType\", doc.structureType);\n    if(doc.confirmationId){\n      index(\"confirmationId\", doc.confirmationId);\n    }\n    if(doc.region){\n      index(\"region\", doc.region);\n    }\n    if(doc.groupId){\n      index(\"groupId\", doc.groupId);\n    }\n  }\n}"
+    },
+    "allRMSExceptionTransactions": {
+        "analyzer": "standard",
+            "index": "function (doc) {\n  \n  if(doc.structureType && doc.structureType==='confirmation'){\n    index(\"structureType\", doc.structureType);\n    if(doc.confirmationId){\n      index(\"confirmationId\", doc.confirmationId);\n    }\n    if(doc.region){\n      index(\"region\", doc.region);\n    }\n    if(doc.groupId){\n      index(\"groupId\", doc.groupId);\n    }\n  }\n}"
+    },
+    "searchByConfirmationId": {
+        "analyzer": "standard",
+            "index": "function (doc) {\n  if (doc.structureType && doc.structureType === 'confirmation') {\n    index (\"structureType\", doc.structureType);\n    if (doc.confirmationId) {\n      index (\"confirmationId\", doc.confirmationId);\n    }\n  }\n}"
+    },
+    "searchAllDocsWithConfirmationId": {
+        "analyzer": "standard",
+            "index": "function (doc) {\n  if (doc.structureType) {\n    index (\"structureType\", doc.structureType);\n    if (doc.confirmationId) {\n      index (\"confirmationId\", doc.confirmationId);\n    }\n  }\n}"
+    },
+    "transactionMrnAssignmentFilters": {
+        "analyzer": "standard",
+            "index": "function (doc) {\n  \n  \n  if(doc.structureType && (doc.structureType===\"confirmation\") && (doc.exceptionInfo && doc.exceptionInfo.enrollmentStage && doc.exceptionInfo.enrollmentStage===\"MRN assignment in Progress\")){\n    index(\"structureType\",doc.structureType);\n    index(\"exceptionInfo.enrollmentStage\",doc.exceptionInfo.enrollmentStage);\n    if(doc.confirmationId){\n      index(\"confirmationId\",doc.confirmationId);\n    }\n    if(doc.region){\n      index(\"region\",doc.region);\n    }\n    if(doc.groupId){\n      index(\"groupId\",doc.groupId);\n    }\n    if(doc.subgroupId){\n      index(\"subgroupId\",doc.subgroupId);\n    }\n    if(doc.billgroupId){\n      index(\"billgroupId\",doc.billgroupId);\n    }\n    if(doc.subscriberName){\n              index(\"subscriberName\",(((doc.subscriberName.split(' ').join('')).split(',').join('')).split('\\'').join('')).toLowerCase());\n              \n              index(\"firstName\",(((doc.subscriberName.split(' ').join('')).split(',')[1])).toLowerCase());\n              index(\"lastName\",(((doc.subscriberName.split(' ').join('')).split(',')[0])).toLowerCase());\n    }\n    if(doc.groupName){\n      index(\"groupName\",doc.groupName);\n    }\n    if(doc.regionName){\n      index(\"regionName\",doc.regionName);\n    }\n    if(doc.createTimestamp){\n      index(\"createTimestamp\",doc.createTimestamp);\n    }\n    \n  }\n}"
+    },
+    "transactionRmsExceptionFilters": {
+        "analyzer": "standard",
+            "index": "function (doc) {\n  \nif (doc.structureType && (doc.structureType===\"confirmation\") && !doc.confirmationId.match(/RQID*/) && (doc.confirmationStatus && doc.confirmationStatus.toUpperCase()===\"RMS ERROR\") && (!doc.exceptionInfo || !doc.exceptionInfo.enrollmentStage || (doc.exceptionInfo.enrollmentStage!==\"MRN assignment in Progress\" &&  doc.exceptionInfo.enrollmentStage!==\"MRN assignment Submitted\"))){\n    index(\"structureType\",doc.structureType);\n    index(\"exceptionInfo.enrollmentStage\",doc.exceptionInfo.enrollmentStage);\n    if(doc.confirmationId){\n      index(\"confirmationId\",doc.confirmationId);\n    }\n    if(doc.region){\n      index(\"region\",doc.region);\n    }\n    if(doc.groupId){\n      index(\"groupId\",doc.groupId);\n    }\n    if(doc.subgroupId){\n      index(\"subgroupId\",doc.subgroupId);\n    }\n    if(doc.billgroupId){\n      index(\"billgroupId\",doc.billgroupId);\n    }\n    if(doc.subscriberName){\n              index(\"subscriberName\",(((doc.subscriberName.split(' ').join('')).split(',').join('')).split('\\'').join('')).toLowerCase());\n              \n              index(\"firstName\",(((doc.subscriberName.split(' ').join('')).split(',')[1])).toLowerCase());\n              index(\"lastName\",(((doc.subscriberName.split(' ').join('')).split(',')[0])).toLowerCase());\n            }\n    if(doc.groupName){\n      index(\"groupName\",doc.groupName);\n    }\n    if(doc.regionName){\n      index(\"regionName\",doc.regionName);\n    }\n    if(doc.createTimestamp){\n      index(\"createTimestamp\",doc.createTimestamp);\n    }\n    \n  }\n}"
+    },
+    "massEnrollGetMembers": {
+        "analyzer": "standard",
+            "index": "function (doc) {\n  if(doc.structureType===\"confirmation\" && (doc.confirmationStatus===\"WIP\" || doc.confirmationStatus===\"RMS ERROR\") && (doc.transactionType===\"Enroll-mass\" || doc.transactionType===\"EnrollSub/family\")){\n    if(doc.region){\n      index(\"region\", doc.region);\n    }\n    if(doc.groupId){\n      index(\"groupId\", doc.groupId);\n    }\n    if(doc.subgroupId){\n      index(\"subgroupId\", doc.subgroupId);\n    }\n    \n    if(doc.transactionData.subscriberInfo.demographics.primary.ssn){\n      index(\"ssn\", doc.transactionData.subscriberInfo.demographics.primary.ssn,{\"store\":true});\n    }\n    if(doc.transactionData.subscriberInfo.demographics.primary.dateOfBirth){\n      index(\"dateOfBirth\", doc.transactionData.subscriberInfo.demographics.primary.dateOfBirth);\n    }\n    if(doc.transactionData.subscriberInfo.demographics.primary.name.last){\n      index(\"lastName\", doc.transactionData.subscriberInfo.demographics.primary.name.last);\n    }\n    if(doc.transactionData.subscriberInfo.demographics.primary.gender){\n      index(\"gender\", doc.transactionData.subscriberInfo.demographics.primary.gender);\n    }\n    if(doc.transactionData.subscriberInfo.demographics.primary.employeeID){\n      index(\"employeeID\", doc.transactionData.subscriberInfo.demographics.primary.employeeID);\n    }\n    \n\n  }\n}"
+    },
+    "searchIndexViewTransactionHistory": {
+        "analyzer": "standard",
+            "index": "function (doc) {\n  \n    \n        if(doc.structureType && doc.structureType===\"confirmation\"){\n          index(\"structureType\",doc.structureType);\n            if(doc.region){\n              index(\"region\",doc.region);\n            }\n            if(doc.transactionType){\n              index(\"transactionType\",doc.transactionType.split('-').join(''));\n            }\n            if(doc.groupId){\n              index(\"groupId\",doc.groupId);\n            }\n            if(doc.subgroupId){\n                index(\"subgroupId\",doc.subgroupId);\n            }\n            if(doc.billGroupId){\n              index(\"billGroupId\",doc.billGroupId,{store:true});\n            }\n            if(doc.subscriberMrn){\n              index(\"subscriberMrn\",doc.subscriberMrn);\n            }\n            if(doc.createTimestamp){\n              index(\"createTimestamp\",doc.createTimestamp);\n            } \n            if(doc.subscriberName){\n              index(\"subscriberName\",(((doc.subscriberName.split(' ').join('')).split(',').join('')).split('\\'').join('')).toLowerCase());\n              index(\"firstName\",(((doc.subscriberName.split(' ').join('')).split(',')[1])).toLowerCase());\n              index(\"lastName\",(((doc.subscriberName.split(' ').join('')).split(',')[0])).toLowerCase());\n            }\n           \n            if(doc.confirmationStatus){\n              index(\"confirmationStatus\",doc.confirmationStatus);\n            }\n            if(doc.confirmationId){\n              index(\"confirmationId\",doc.confirmationId);\n            }\n            if(doc.regionName){\n              index(\"regionName\",doc.regionName);\n            }\n            if(doc.groupName){\n              index(\"groupName\",doc.groupName);\n            }            \n        }\n        \n        \n  \n}"
+    },
+    "searchIndexView": {
+        "analyzer": "standard",
+            "index": "function (doc) {\n  \n    \n        if(doc.structureType && doc.structureType===\"confirmation\"){\n          index(\"structureType\",doc.structureType,{\"facet\": true});\n            if(doc.region){\n              index(\"region\",doc.region,{\"facet\": true});\n            }\n            if(doc.transactionType){\n              index(\"transactionType\",doc.transactionType,{\"facet\": true});\n            }\n            if(doc.groupId){\n              index(\"groupId\",doc.groupId,{\"facet\": true});\n            }\n            if(doc.subgroupId){\n                index(\"subgroupId\",doc.subgroupId,{\"facet\": true});\n            }\n            if(doc.subscriberMrn){\n              index(\"subscriberMrn\",doc.subscriberMrn,{\"facet\": true});\n            }\n            if(doc.createTimestamp){\n              index(\"createTimestamp\",doc.createTimestamp,{\"facet\": true});\n            } \n            if(doc.suscriberName){\n              index(\"suscriberName\",doc.suscriberName,{\"facet\": true});\n            }\n            if(doc.confirmationStatus){\n              index(\"confirmationStatus\",doc.confirmationStatus,{\"facet\": true});\n            }\n            if(doc.confirmationId){\n              index(\"confirmationId\",doc.confirmationId,{\"facet\": true});\n            }\n            if(doc.regionName){\n              index(\"regionName\",doc.regionName,{\"facet\": true});\n            }\n            if(doc.groupName){\n              index(\"groupName\",doc.groupName,{\"facet\": true});\n            }            \n        }\n        \n        \n  \n}"
+    },
+    "purgeRecordsView": {
+        "analyzer": "standard",
+            "index": "function (doc) {\n  if(doc.confirmationId){\n  index(\"confirmationId\", doc.confirmationId);\n  }\n  if(doc.structureType){\n  index(\"structureType\", doc.structureType);\n  }\n}"
+    }
+}
+}

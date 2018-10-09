@@ -1,0 +1,25 @@
+{
+    "_id": "_design/app",
+    "indexes": {
+    "indexApplicationId": {
+        "analyzer": "standard",
+            "index": "function (doc) {\n  if(doc.header.applicationId){\n    index(\"applicationId\", doc.header.applicationId);\n  }\n}"
+    },
+    "indexGroupInfo": {
+        "analyzer": "standard",
+            "index": "function (doc) {\n  if(doc.region){\n    index(\"region\", doc.region);\n  }\n  if(doc.groupInformation.groupId){\n    index(\"groupId\", doc.groupInformation.groupId);\n  }\n  if(doc.groupInformation.subGroupId){\n    index(\"subGroupId\", doc.groupInformation.subGroupId);\n  }\n  if(doc.groupInformation.billGroupId){\n    index(\"billGroupId\", doc.groupInformation.billGroupId);\n  }\n}"
+    },
+    "indexGroupInfoCA": {
+        "analyzer": "standard",
+            "index": "function (doc) {\n  if(doc.region){\n    index(\"region\", (doc.region==\"NCA\" || doc.region == \"SCA\") ? \"CA\" : doc.region);\n  }\n  if(doc.groupInformation.groupId){\n    index(\"groupId\", doc.groupInformation.groupId);\n  }\n  if(doc.groupInformation.subGroupId){\n    index(\"subGroupId\", doc.groupInformation.subGroupId);\n  }\n  if(doc.groupInformation.billGroupId){\n    index(\"billGroupId\", doc.groupInformation.billGroupId);\n  }\n}"
+    },
+    "indexGroupInfoFull": {
+        "analyzer": "standard",
+            "index": "function (doc) {\n  if(doc.applicationSource){\n    index(\"applicationSource\", doc.applicationSource);\n  }\n  if(doc.applicationType){\n    index(\"applicationType\", doc.applicationType);\n  }\n  if(doc.region){\n    index(\"region\", doc.region);\n  }\n  if(doc.groupInformation.groupId){\n    index(\"groupId\", doc.groupInformation.groupId);\n  }\n  if(doc.groupInformation.subGroupId){\n    index(\"subGroupId\", doc.groupInformation.subGroupId);\n  }\n  if(doc.groupInformation.billGroupId){\n    index(\"billGroupId\", doc.groupInformation.billGroupId);\n  }\n  if(doc.header.userId){\n    index(\"userId\", doc.header.userId);\n  }\n}"
+    },
+    "indexGroupInfoFullCA": {
+        "analyzer": "standard",
+            "index": "function (doc) {\n  if(doc.applicationSource){\n    index(\"applicationSource\", doc.applicationSource);\n  }\n  if(doc.applicationType){\n    index(\"applicationType\", doc.applicationType);\n  }\n  if(doc.region){\n    index(\"region\", (doc.region==\"NCA\" || doc.region == \"SCA\") ? \"CA\" : doc.region);\n  }\n  if(doc.groupInformation.groupId){\n    index(\"groupId\", doc.groupInformation.groupId);\n  }\n  if(doc.groupInformation.subGroupId){\n    index(\"subGroupId\", doc.groupInformation.subGroupId);\n  }\n  if(doc.groupInformation.billGroupId){\n    index(\"billGroupId\", doc.groupInformation.billGroupId);\n  }\n  if(doc.header.userId){\n    index(\"userId\", doc.header.userId);\n  }\n}"
+    }
+}
+}

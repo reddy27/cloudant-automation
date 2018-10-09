@@ -1,0 +1,19 @@
+{
+    "_id": "_design/getReportsDesign",
+    "views": {
+    "landingView": {
+        "map": "function (doc) {\n  emit(doc._id,{\"_id\":doc._id,\"creationDate\":doc.creationDate,\"reportName\":doc.reportName,\"periodicity\":doc.periodicity,\"reportType\":doc.reportType});\n \n}"
+    }
+},
+    "language": "javascript",
+    "indexes": {
+    "download": {
+        "analyzer": "standard",
+            "index": "function (doc) {\n  index(\"id\", doc._id);\n}"
+    },
+    "landing": {
+        "analyzer": "standard",
+            "index": "function (doc) {\n  index(\"creationDate\", doc.creationDate);\n}\n"
+    }
+}
+}
