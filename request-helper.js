@@ -36,7 +36,7 @@ const buildConnections = (forWho) => {
 const createViewsAndIndexes = async (serviceSpecificIndexes) => {
     try {
         //TODO: remove test at the end, after demoing to @Navdeep.
-        const indexFile = `${serviceSpecificIndexes}Index.def`
+        const indexFile = `./def/${serviceSpecificIndexes}Index.def`
 
         const readFile = await fs.readFile(indexFile, 'utf8');
 
